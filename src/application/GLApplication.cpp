@@ -250,6 +250,9 @@ void GLApplication::updateCamera() {
       //cameraWorld() * Vector4 => on prend l'axe vertical du monde et on le traduit dans le repère de la caméra
       //(il y a peut être plus simple que _camera.cameraWorld() * Vector4(0., 1., 0., 0.)).xyz() ...
       _camera.rotate(-deltaMouseX(), (_camera.cameraWorld() * Vector4(0., 1., 0., 0.)).xyz(), Coordinate_Local);
+
+      //test pour E3Q1
+      _camera.windowToNDC(mouseX(), mouseY());
   }
 }
 

@@ -86,6 +86,10 @@ void Camera2::applyGL() {
 p3d::Vector3 Camera2::windowToNDC(int x,int y) {
   Vector3 res(0,0,0);
 
+  //E3Q1
+  res.x( (double) 2. * ( x - _viewX) / (double)_viewWidth - 1.);
+  res.y( (double) 2. * ( y - _viewY) / (double)_viewHeight - 1.);
+  res.z(-1.);
   cout << "window to NDC : " << res << endl;
 
   return res;
