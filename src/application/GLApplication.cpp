@@ -225,25 +225,31 @@ void GLApplication::moveSelectedObject() {
 }
 
 void GLApplication::updateCamera() {
+    //E2Q1
   if (left()) {
-      _camera.translate(-0.5, 0, 0, Coordinate_World);
+      _camera.translate(-0.5, 0, 0, Coordinate_Local);
   }
 
   if (right()) {
-      _camera.translate(0.5, 0, 0, Coordinate_World);
+      _camera.translate(0.5, 0, 0, Coordinate_Local);
   }
 
   if (forward()) {
-      _camera.translate(0, 0, -0.5, Coordinate_World);
+      _camera.translate(0, 0, -0.5, Coordinate_Local);
   }
 
   if (backward()) {
-      _camera.translate(0, 0, 0.5, Coordinate_World);
+      _camera.translate(0, 0, 0.5, Coordinate_Local);
   }
 
   if (mouseLeft()) {
     // rotate camera : deltaMouseX(), deltaMouseY() give the mouse motion
 
+      //E2Q2
+      _camera.rotate(deltaMouseY(), 1., 0, 0, Coordinate_Local);
+      //cameraWorld() * Vector4 => on prend l'axe vertical du monde et on le traduit dans le repère de la caméra
+      //(il y a peut être plus simple que _camera.cameraWorld() * Vector4(0., 1., 0., 0.)).xyz() ...
+      _camera.rotate(-deltaMouseX(), (_camera.cameraWorld() * Vector4(0., 1., 0., 0.)).xyz(), Coordinate_Local);
   }
 }
 
