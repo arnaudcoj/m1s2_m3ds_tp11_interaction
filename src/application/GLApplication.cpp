@@ -226,17 +226,21 @@ void GLApplication::moveSelectedObject() {
 
 void GLApplication::updateCamera() {
   if (left()) {
-
+      _camera.translate(-0.5, 0, 0, Coordinate_World);
   }
+
   if (right()) {
-
+      _camera.translate(0.5, 0, 0, Coordinate_World);
   }
+
   if (forward()) {
-
+      _camera.translate(0, 0, -0.5, Coordinate_World);
   }
+
   if (backward()) {
-
+      _camera.translate(0, 0, 0.5, Coordinate_World);
   }
+
   if (mouseLeft()) {
     // rotate camera : deltaMouseX(), deltaMouseY() give the mouse motion
 
