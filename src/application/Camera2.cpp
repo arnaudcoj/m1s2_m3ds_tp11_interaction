@@ -87,8 +87,12 @@ p3d::Vector3 Camera2::windowToNDC(int x,int y) {
   Vector3 res(0,0,0);
 
   //E3Q1
-  res.x( (double) 2. * ( x - _viewX) / (double)_viewWidth - 1.);
-  res.y( (double) 2. * ( y - _viewY) / (double)_viewHeight - 1.);
+  //Attention car x, y, _viewX, etc. sont des int, donc on convertit en double
+  //x - viewX = position dans le repère de la view
+  // positionX / viewWidth = position dans l'intervalle [0, 1]
+  // 2 * position[0,1] - 1 = position dans l'intervalle [-1, 1]
+  res.x( 2. * (double) ( x - _viewX) / (double)_viewWidth - 1.);
+  res.y( 2. * (double) ( y - _viewY) / (double)_viewHeight - 1.);
   res.z(-1.);
   cout << "window to NDC : " << res << endl;
 
@@ -98,11 +102,31 @@ p3d::Vector3 Camera2::windowToNDC(int x,int y) {
 p3d::Vector3 Camera2::windowToCamera(int x,int y) {
   Vector3 res(0,0,0);
 
+  //E3Q2
+  //on prend les coordonnées en NDC (cad dans le repère [-1, 1])
+  res = windowToNDC(x,y);
+
+  //on applique l'inverse de la projection à res
+  //cad resCamera = camera->window * resWindow
+  //sachant qu'ici : resWindow = (x,y) (en NDC)
+  // et _projection = window->camera ( d'où le _projection.inverse() )
+  res = _projection.inverse().transformPoint(res);
+  cout << "window to Camera : " << res << endl;
+
   return res;
 }
 
 p3d::Vector3 Camera2::windowToWorld(int x,int y) {
   Vector3 res(0,0,0);
+
+  //E3Q2
+  //on recupère les coordonnées de (x,y) dans le repère Eye
+  res = windowToCamera(x,y);
+
+  // resWorld = world->camera * resCamera
+  res = worldCamera().transformPoint(res);
+
+  cout << "window to World : " << res << endl;
 
   return res;
 }
@@ -111,7 +135,23 @@ p3d::Vector3 Camera2::windowToWorld(int x,int y) {
 p3d::Line Camera2::pickingRay(int x, int y) {
   Line res;
   // res.point(a), res.direction(u) to set the line (a and u are Vector3)
+  //E3Q2
 
+  //L'origine de la droite est située au niveau de la caméra, à son origine (0,0,0)
+  //ACamera = (0,0,0)
+  //AWorld = world->camera * ACamera
+  Vector3 A = worldCamera().transformPoint(Vector3(0.,0.,0.));
+
+  //On récupère le point cliqué dans le repère du World
+  Vector3 P = windowToWorld(x,y);
+
+  //le point d'origine est A
+  res.point(A);
+
+  //le vecteur de direction est AP
+  res.direction(Vector3(A,P));
+
+  cout << "line " << res << endl;
   return res;
 }
 
