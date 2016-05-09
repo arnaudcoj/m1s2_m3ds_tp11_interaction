@@ -214,8 +214,14 @@ void GLApplication::moveSelectedObject() {
       double dx=double(deltaMouseX())/100.0,dy=double(deltaMouseY())/100.0; // /100.0 to attenuate mouse motion
 
       if (_controlMouse==Manipulation_Translation) {
-          //e5q1
-          mesh->translate(dx,dy,0,Coordinate_Local);
+          //e5q2
+          //On transfère dx, dy dans World
+          Vector3 mouvmentWorld = _camera.directionTo(Coordinate_World, Vector3(dx, dy, 0));
+
+          //On re-transfère dans les coordonnées locales de l'objet
+          Vector3 mouvmentLocal = mesh->directionTo(Coordinate_Local, mouvmentWorld);
+
+          mesh->translate(mouvmentLocal ,Coordinate_Local);
       }
       else if (_controlMouse==Manipulation_Orientation) {
 
