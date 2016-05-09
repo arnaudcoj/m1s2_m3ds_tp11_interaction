@@ -189,7 +189,7 @@ void GLApplication::selectObject() {
   }
   if (mouseRightPressed()) {
 
-    _sceneIntersection.intersect({&_triangle},_pickingRay);
+    _sceneIntersection.intersect({&_triangle, &_triceratops, &_cow},_pickingRay);
 
     if (_sceneIntersection.size()>0) {
 
