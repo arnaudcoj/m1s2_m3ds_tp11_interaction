@@ -56,7 +56,51 @@ bool SceneIntersection::intersect(const Line &ray,const Vector3 &s0,const Vector
     bool res=false;
     double lambda=0.0;
 
+    //Algo de Möller-Trumbore
+    //https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 
+    Vector3 e1, e2;
+    Vector3 P, Q, T;
+    float det, inv_det, u, v;
+    float t;
+
+
+    //On sélectionne deux côtés du triangle pour avoir le plan
+    e1 = Vector3(s0, s1);
+    e2 = Vector3(s0, s2);
+
+    //On vérifie si le rayon directeur est dans le plan
+    P = ray.direction().cross(e2);
+    det = e1.dot(P);
+    if(det == 0 )
+        return res;
+
+    //À ce niveau on sait que le rayon est dans le plan
+    inv_det = 1.f / det;
+
+    //Calcul de la distance entre s0 et le point d'origine du rayon
+    //j'ai pas tout compris voir l'algo sur les internets
+
+    T = Vector3(s0, ray.point());
+
+    u = T.dot(P) * inv_det;
+
+    if(u < 0.f || u > 1.f)
+        return res;
+
+    Q = T.cross(e1);
+
+    v = ray.direction().dot(Q) * inv_det;
+
+    if(v < 0.f || u + v > 1.f)
+        return res;
+
+    t = e2.dot(Q) * inv_det;
+
+    res = t > 0.;
+
+    if(res)
+        lambda = t;
 
     *lambdaRes=lambda;
     return res;
