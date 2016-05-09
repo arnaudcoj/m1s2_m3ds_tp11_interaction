@@ -215,13 +215,63 @@ void GLApplication::moveSelectedObject() {
 
       if (_controlMouse==Manipulation_Translation) {
           //e5q2
-          //On transfère dx, dy dans World
-          Vector3 mouvmentWorld = _camera.directionTo(Coordinate_World, Vector3(dx, dy, 0));
 
-          //On re-transfère dans les coordonnées locales de l'objet
-          Vector3 mouvmentLocal = mesh->directionTo(Coordinate_Local, mouvmentWorld);
 
-          mesh->translate(mouvmentLocal ,Coordinate_Local);
+          Vector3 T_Interface;  // <- c'est ça qu'il faut trouver : T_Interface (T' sur le schéma)
+
+          //On devra trouver P'_Interface car T_Interface = [P_Interface,P'_Interface]
+          Vector3 Pp_Interface;
+
+          //Pour trouver P'_Interface, il nous faut trouver :
+          //le rayon qui part de la caméra et qui passe par P'_Ecran (voir schéma)
+          Line ray2;
+          //à quelle distance de la caméra se situe le point d'intersection entre le plan Interface et le rayon
+          double k;
+          //grâce à ces 2 éléments on pourra retrouver P'_Interface et donc T_Interface
+
+
+          //On connait :
+          Vector3 P_Interface = _attachPointWorld;
+          Vector3 P_Ecran = _pickingRay.point();
+          Vector3 T_Ecran = _camera.directionTo(Coordinate_World, Vector3(dx, dy, 0)); //distance que parcourt le curseur
+          Vector3 Eye = _camera.pointTo(Coordinate_World, Vector3(0.,0.,0.)); // Origine de la caméra
+
+          //n = la normale du plan Ecran et donc Interaction (les plans sont parallèles)
+          //on le passe dans le repère World pour que tout soit calculé dans ce repère
+          Vector3 n = _camera.directionTo(Coordinate_World, Vector3(0., 0., 1.));
+
+          //On calcule P'_Ecran (On translate P_Ecran avec le vecteur T_Ecran)
+          Vector3 Pp_Ecran = P_Ecran + T_Ecran;
+
+          //On créé le rayon qui part de la caméra et passe par le point P'_Ecran
+          ray2 = _camera.pickingRay(Pp_Ecran.x(), Pp_Ecran.y());
+
+          //Maintenant on cherche k
+          //Pour se faire on doit résoudre l'intersection entre ray2 et le plan interaction
+
+          //Le plan interaction est défini par le point P_Interaction et par le vecteur (0,0,1)_Camera
+          //(les 2 plans sont parallèles, la normale de écran est (0,0,1)_Ecran, donc la même normale pour interaction
+          //(voir schéma tp)
+
+          //La droite pour laquelle on veut trouver l'intersection est ray2,
+          //qui part de la caméra et passe par P'_Ecran, et logiquement par P'_Interaction
+
+          //Pour se faire, IL SUFFIT DE résoudre [P_Interface,I].n = 0,
+          //sachant qu'on connait P_Interface, que n = (0,0,1)Camera,
+          //que I = Eye + k * [ray2.direction()] <- ça j'ai toujours pas compris
+
+          //il faut savoir que Eye est le point "d'origine" de ray2, qui passe par ray2.point()
+          //[Eye,ray2.point()] est donc en fait le vecteur ray2.direction()
+
+          //En résolvant l'équation (je n'écris pas tout), on voit que
+          k = - (Vector3(P_Interface, Eye).dot(n)) / ray2.direction().dot(n);
+
+          Pp_Interface = Eye + k * ray2.direction(); // WOOT !! \o/
+
+          //Maintenant qu'on a P'_Interface, on peut calculer T_interface
+          T_Interface = Vector3(P_Interface, Pp_Interface);
+
+          mesh->translate(T_Interface ,Coordinate_World);
       }
       else if (_controlMouse==Manipulation_Orientation) {
 
