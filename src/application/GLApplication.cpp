@@ -215,8 +215,11 @@ void GLApplication::moveSelectedObject() {
 
       if (_controlMouse==Manipulation_Translation) {
           //e5q2
+          Vector3 T = _camera.directionTo(Coordinate_World, Vector3(dx, dy, 0));
+          mesh->translate(T ,Coordinate_World);
 
-
+          //e5q3
+          /*
           Vector3 T_Interface;  // <- c'est ça qu'il faut trouver : T_Interface (T' sur le schéma)
 
           //On devra trouver P'_Interface car T_Interface = [P_Interface,P'_Interface]
@@ -270,8 +273,8 @@ void GLApplication::moveSelectedObject() {
 
           //Maintenant qu'on a P'_Interface, on peut calculer T_interface
           T_Interface = Vector3(P_Interface, Pp_Interface);
-
           mesh->translate(T_Interface ,Coordinate_World);
+*/
       }
       else if (_controlMouse==Manipulation_Orientation) {
 
