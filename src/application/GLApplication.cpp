@@ -273,10 +273,10 @@ void GLApplication::moveSelectedObject() {
 
       }
       else if (_controlMouse==Manipulation_Orientation) {
-          mesh->rotate(dy, 1., 0, 0, Coordinate_Local);
-          //cameraWorld() * Vector4 => on prend l'axe vertical du monde et on le traduit dans le repère de la caméra
-          //(il y a peut être plus simple que _camera.cameraWorld() * Vector4(0., 1., 0., 0.)).xyz() ...
-          mesh->rotate(-dx, _camera.directionTo(Coordinate_World, Vector3(0., 1., 0.)), Coordinate_Local);
+          //on a + l'impression de "conduire" le modèle de l'intérieur que de l'orienter de l'extérieur, mais au moins le comportement de l'orientation est constant
+          //on sait que quand on tourne à gauche, la vache ira sur SA gauche, etc.
+          mesh->rotate(dy * 100., mesh->directionTo(Coordinate_World, Vector3(0., 0., 1.)), Coordinate_World);
+          mesh->rotate(dx * 100., mesh->directionTo(Coordinate_World, Vector3(0., 1., 0.)), Coordinate_World);
       }
     }
   }
@@ -307,7 +307,7 @@ void GLApplication::updateCamera() {
       //E2Q2
       _camera.rotate(deltaMouseY(), 1., 0, 0, Coordinate_Local);
       //cameraWorld() * Vector4 => on prend l'axe vertical du monde et on le traduit dans le repère de la caméra
-      _camera.rotate(-deltaMouseX(), _camera.directionTo(Coordinate_World, Vector3(0., 1., 0.)), Coordinate_Local);
+      _camera.rotate(-deltaMouseX(), (_camera.cameraWorld() * Vector4(0., 1., 0., 0.)).xyz(), Coordinate_Local);
   }
 }
 
