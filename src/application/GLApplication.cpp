@@ -273,7 +273,10 @@ void GLApplication::moveSelectedObject() {
 
       }
       else if (_controlMouse==Manipulation_Orientation) {
-
+          mesh->rotate(dy, 1., 0, 0, Coordinate_Local);
+          //cameraWorld() * Vector4 => on prend l'axe vertical du monde et on le traduit dans le repère de la caméra
+          //(il y a peut être plus simple que _camera.cameraWorld() * Vector4(0., 1., 0., 0.)).xyz() ...
+          mesh->rotate(-dx, _camera.directionTo(Coordinate_World, Vector3(0., 1., 0.)), Coordinate_Local);
       }
     }
   }
@@ -304,8 +307,7 @@ void GLApplication::updateCamera() {
       //E2Q2
       _camera.rotate(deltaMouseY(), 1., 0, 0, Coordinate_Local);
       //cameraWorld() * Vector4 => on prend l'axe vertical du monde et on le traduit dans le repère de la caméra
-      //(il y a peut être plus simple que _camera.cameraWorld() * Vector4(0., 1., 0., 0.)).xyz() ...
-      _camera.rotate(-deltaMouseX(), (_camera.cameraWorld() * Vector4(0., 1., 0., 0.)).xyz(), Coordinate_Local);
+      _camera.rotate(-deltaMouseX(), _camera.directionTo(Coordinate_World, Vector3(0., 1., 0.)), Coordinate_Local);
   }
 }
 
