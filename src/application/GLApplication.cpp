@@ -214,67 +214,63 @@ void GLApplication::moveSelectedObject() {
       double dx=double(deltaMouseX())/100.0,dy=double(deltaMouseY())/100.0; // /100.0 to attenuate mouse motion
 
       if (_controlMouse==Manipulation_Translation) {
-          //e5q2
+          //e5q
+          /*
           Vector3 T = _camera.directionTo(Coordinate_World, Vector3(dx, dy, 0));
           mesh->translate(T ,Coordinate_World);
+*/
 
           //e5q3
-          /*
+
+          //Attention :
+          //on ne se sert pas de dx, dy ici.
+          //contrairement à ce qui est noté sur le schéma, pickingray n'est pas dirigé vers P mais vers P'
+
           Vector3 T_Interface;  // <- c'est ça qu'il faut trouver : T_Interface (T' sur le schéma)
 
           //On devra trouver P'_Interface car T_Interface = [P_Interface,P'_Interface]
           Vector3 Pp_Interface;
 
           //Pour trouver P'_Interface, il nous faut trouver :
-          //le rayon qui part de la caméra et qui passe par P'_Ecran (voir schéma)
-          Line ray2;
           //à quelle distance de la caméra se situe le point d'intersection entre le plan Interface et le rayon
           double k;
-          //grâce à ces 2 éléments on pourra retrouver P'_Interface et donc T_Interface
-
 
           //On connait :
           Vector3 P_Interface = _attachPointWorld;
-          Vector3 P_Ecran = _pickingRay.point();
-          Vector3 T_Ecran = _camera.directionTo(Coordinate_World, Vector3(dx, dy, 0)); //distance que parcourt le curseur
-          Vector3 Eye = _camera.pointTo(Coordinate_World, Vector3(0.,0.,0.)); // Origine de la caméra
+          Vector3 Eye = _pickingRay.point(); // Origine de la caméra
+          Vector3 ray = _pickingRay.direction();
 
           //n = la normale du plan Ecran et donc Interaction (les plans sont parallèles)
           //on le passe dans le repère World pour que tout soit calculé dans ce repère
           Vector3 n = _camera.directionTo(Coordinate_World, Vector3(0., 0., 1.));
 
-          //On calcule P'_Ecran (On translate P_Ecran avec le vecteur T_Ecran)
-          Vector3 Pp_Ecran = P_Ecran + T_Ecran;
-
-          //On créé le rayon qui part de la caméra et passe par le point P'_Ecran
-          ray2 = _camera.pickingRay(Pp_Ecran.x(), Pp_Ecran.y());
-
           //Maintenant on cherche k
-          //Pour se faire on doit résoudre l'intersection entre ray2 et le plan interaction
+          //Pour se faire on doit résoudre l'intersection entre ray et le plan interaction
 
           //Le plan interaction est défini par le point P_Interaction et par le vecteur (0,0,1)_Camera
           //(les 2 plans sont parallèles, la normale de écran est (0,0,1)_Ecran, donc la même normale pour interaction
           //(voir schéma tp)
 
-          //La droite pour laquelle on veut trouver l'intersection est ray2,
+          //La droite pour laquelle on veut trouver l'intersection est ray,
           //qui part de la caméra et passe par P'_Ecran, et logiquement par P'_Interaction
 
           //Pour se faire, IL SUFFIT DE résoudre [P_Interface,I].n = 0,
           //sachant qu'on connait P_Interface, que n = (0,0,1)Camera,
-          //que I = Eye + k * [ray2.direction()] <- ça j'ai toujours pas compris
+          //que I = Eye + k * ray
 
-          //il faut savoir que Eye est le point "d'origine" de ray2, qui passe par ray2.point()
-          //[Eye,ray2.point()] est donc en fait le vecteur ray2.direction()
+          //En résolvant l'équation (je n'écris pas tout, voir tp bsp), on voit que
+          k = (Vector3(Eye, P_Interface).dot(n)) / ray.dot(n);
 
-          //En résolvant l'équation (je n'écris pas tout), on voit que
-          k = - (Vector3(P_Interface, Eye).dot(n)) / ray2.direction().dot(n);
-
-          Pp_Interface = Eye + k * ray2.direction(); // WOOT !! \o/
+          Pp_Interface = Eye + k * ray; // WOOT !! \o/
 
           //Maintenant qu'on a P'_Interface, on peut calculer T_interface
           T_Interface = Vector3(P_Interface, Pp_Interface);
           mesh->translate(T_Interface ,Coordinate_World);
-*/
+
+          //on met à jour le _attachPointWorld pour pouvoir faire [P_Interface, P'_Interface] au tour d'après
+          //(je sais pas si c'est propre, mais le fait est que ça marche)
+          _attachPointWorld = Pp_Interface;
+
       }
       else if (_controlMouse==Manipulation_Orientation) {
 
